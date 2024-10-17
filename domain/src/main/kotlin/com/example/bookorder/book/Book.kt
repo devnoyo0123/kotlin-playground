@@ -1,8 +1,9 @@
-package com.example.bookorder.entity
+package com.example.bookorder.book
 
-import com.example.bookorder.core.BaseEntity
-import com.example.bookorder.core.EntityId
+import com.example.bookorder.core.entity.BaseEntity
+import com.example.bookorder.core.entity.EntityId
 import com.example.bookorder.book.exception.InsufficientStockException
+import com.example.bookorder.core.entity.Audit
 import java.math.BigDecimal
 
 @JvmInline
@@ -30,4 +31,9 @@ data class Book(
     fun increaseStock(quantity: Int) {
         stock += quantity
     }
+
+    fun canFulfillOrder(quantity: Int): Boolean {
+        return stock >= quantity
+    }
+
 }

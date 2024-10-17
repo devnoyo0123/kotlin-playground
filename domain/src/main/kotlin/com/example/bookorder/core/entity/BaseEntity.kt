@@ -1,4 +1,4 @@
-package com.example.bookorder.core
+package com.example.bookorder.core.entity
 
 interface EntityId<T> {
     val value: T

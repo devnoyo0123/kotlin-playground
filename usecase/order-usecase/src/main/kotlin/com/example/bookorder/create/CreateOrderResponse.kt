@@ -1,9 +1,9 @@
 package com.example.bookorder.create
 
-import com.example.bookorder.entity.OrderStatus
-import java.util.*
+import com.example.bookorder.order.OrderId
+import com.example.bookorder.order.OrderStatus
 
 data class CreateOrderResponse(
-    val orderId: UUID,
+    val orderId: OrderId,
     val status: OrderStatus
 )

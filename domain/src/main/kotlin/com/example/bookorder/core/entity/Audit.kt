@@ -1,4 +1,4 @@
-package com.example.bookorder.entity
+package com.example.bookorder.core.entity
 
 import java.time.LocalDateTime
 

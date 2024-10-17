@@ -1,9 +1,8 @@
-package com.example.bookorder.book.exception
+package com.example.bookorder.create.exception
 
 import com.example.bookorder.core.exception.DefaultException
 
-
-class InsufficientStockException: DefaultException {
+class OrderCreationException: DefaultException {
     constructor(message: String): super(message)
     constructor(message: String, cause: Throwable): super(message, cause)
 }

@@ -1,7 +1,9 @@
-package com.example.bookorder.entity
+package com.example.bookorder.order
 
-import com.example.bookorder.core.BaseEntity
-import com.example.bookorder.core.EntityId
+import com.example.bookorder.book.Book
+import com.example.bookorder.core.entity.BaseEntity
+import com.example.bookorder.core.entity.EntityId
+import com.example.bookorder.core.entity.Audit
 import java.math.BigDecimal
 
 @JvmInline

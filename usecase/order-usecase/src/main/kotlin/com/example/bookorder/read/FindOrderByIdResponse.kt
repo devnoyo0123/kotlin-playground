@@ -1,6 +1,6 @@
 package com.example.bookorder.read
 
-import com.example.bookorder.entity.OrderStatus
+import com.example.bookorder.order.OrderStatus
 import java.util.*
 
 data class FindOrderByIdResponse(
