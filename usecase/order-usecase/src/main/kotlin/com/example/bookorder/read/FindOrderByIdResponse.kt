@@ -1,12 +1,11 @@
 package com.example.bookorder.read
 
 import com.example.bookorder.order.OrderStatus
-import java.util.*
 
 data class FindOrderByIdResponse(
-    val orderId: UUID,
+    val orderId: Long,
     val status: OrderStatus,
-    val message: String
+    val message: String? = null
 ) {
 
 }
