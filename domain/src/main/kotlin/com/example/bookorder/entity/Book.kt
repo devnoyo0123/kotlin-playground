@@ -2,7 +2,7 @@ package com.example.bookorder.entity
 
 import com.example.bookorder.core.BaseEntity
 import com.example.bookorder.core.EntityId
-import com.example.bookorder.exception.InsufficientStockException
+import com.example.bookorder.book.exception.InsufficientStockException
 import java.math.BigDecimal
 
 @JvmInline
