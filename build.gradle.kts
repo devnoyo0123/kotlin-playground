@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 plugins {
-    kotlin("jvm") version "2.0.20"
+    kotlin("jvm") version libs.versions.kotlin.get()
 }
 
 group = "com.example.bookorder"
@@ -13,7 +13,7 @@ kotlin {
     jvmToolchain(21)
 }
 
-subprojects {
+allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
     repositories {

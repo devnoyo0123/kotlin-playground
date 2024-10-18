@@ -7,5 +7,7 @@ interface EntityId<T> {
 interface BaseEntity<ID : EntityId<*>> {
     val id: ID?
 
-    fun getId(): ID = id ?: throw IllegalStateException("${this::class.simpleName} ID is not initialized")
+    fun getEntityId(): ID = id ?: throw IllegalStateException("${this::class.simpleName} ID is not initialized")
+
+    fun getEntityIdOrNull(): ID? = id
 }

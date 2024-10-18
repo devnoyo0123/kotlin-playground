@@ -1,9 +1,8 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.3.3"
-    id("io.spring.dependency-management") version "1.1.3"
-    kotlin("plugin.spring") version "2.0.20"
+    id("org.springframework.boot") version libs.versions.spring.boot.get()
+    id("io.spring.dependency-management") version libs.versions.spring.dependency.management.get()
 }
 
 tasks.getByName<BootJar>("bootJar") {

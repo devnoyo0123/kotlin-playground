@@ -18,18 +18,15 @@ data class Book(
     val title: String,
     val author: String,
     val price: BigDecimal,
-    var stock: Int
+    var stock: Int,
+    val version: Long = 0  // 버전 필드 추가
 ): Audit(), BaseEntity<BookId> {
 
     fun decreaseStock(quantity: Int) {
         if (stock < quantity) {
-            throw InsufficientStockException("Not enough stock for book: $title")
+            throw InsufficientStockException.forBookId(getEntityId())
         }
         stock -= quantity
-    }
-
-    fun increaseStock(quantity: Int) {
-        stock += quantity
     }
 
     fun canFulfillOrder(quantity: Int): Boolean {

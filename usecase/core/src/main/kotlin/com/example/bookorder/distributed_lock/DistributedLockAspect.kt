@@ -4,7 +4,6 @@ import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.reflect.MethodSignature
-import org.redisson.api.RLock
 import org.slf4j.LoggerFactory
 import org.springframework.expression.ExpressionParser
 import org.springframework.expression.spel.standard.SpelExpressionParser
@@ -35,10 +34,10 @@ class DistributedLockAspect(
 
         log.info("Attempting to acquire distributed lock for method: ${method.name}, keys: $lockKeys")
 
-        var lock: RLock? = null
+        var lockAcquired = false
         try {
-            lock = distributedLockPort.multiLock(lockKeys, waitTime, leaseTime, distributedLock.timeUnit)
-            if (lock != null) {
+            lockAcquired = distributedLockPort.acquireMultiLock(lockKeys, waitTime, leaseTime)
+            if (lockAcquired) {
                 log.info("Successfully acquired distributed lock for method: ${method.name}, keys: $lockKeys")
                 log.debug("Before method execution - Thread: ${Thread.currentThread().name}")
                 val result = distributedLockTransaction.proceed(joinPoint)
@@ -53,9 +52,13 @@ class DistributedLockAspect(
             log.error("Error occurred while executing method ${method.name} under distributed lock", e)
             throw e
         } finally {
-            lock?.let {
-                distributedLockPort.multiUnlock(it)
-                log.info("Released distributed lock for method: ${method.name}, keys: $lockKeys")
+            if (lockAcquired) {
+                try {
+                    distributedLockPort.releaseMultiLock(lockKeys)
+                    log.info("Released distributed lock for method: ${method.name}, keys: $lockKeys")
+                } catch (e: Exception) {
+                    log.error("Error occurred while releasing distributed lock for method: ${method.name}, keys: $lockKeys", e)
+                }
             }
         }
     }
