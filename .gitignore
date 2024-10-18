@@ -46,3 +46,9 @@ bin/
 
 .idea
 .idea/
+
+.env
+.env.local
+.env.dev
+.env.stage
+.env.prod
