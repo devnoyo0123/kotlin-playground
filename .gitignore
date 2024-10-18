@@ -47,6 +47,9 @@ bin/
 .idea
 .idea/
 
+
+container/local/mysql
+
 .env
 .env.local
 .env.dev
