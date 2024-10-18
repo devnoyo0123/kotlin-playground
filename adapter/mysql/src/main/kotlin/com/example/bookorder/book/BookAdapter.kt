@@ -22,6 +22,10 @@ class BookAdapter(private val bookRepository: BookRepository) : BookPort {
             entities.map { BookEntityConverter.toBookModel(it) }
         }
     }
+
+    override fun deleteAll() {
+        bookRepository.deleteAll()
+    }
 }
 
 object BookEntityConverter {
@@ -31,7 +35,8 @@ object BookEntityConverter {
             title = book.title,
             author = book.author,
             price = book.price,
-            stock = book.stock
+            stock = book.stock,
+            version = book.version
         ).apply {
             createdAt = book.createdAt
             updatedAt = book.updatedAt
@@ -45,7 +50,8 @@ object BookEntityConverter {
             title = entity.title,
             author = entity.author,
             price = entity.price,
-            stock = entity.stock
+            stock = entity.stock,
+            version = entity.version
         ).apply {
             createdAt = entity.createdAt
             updatedAt = entity.updatedAt

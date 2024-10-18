@@ -23,6 +23,10 @@ class OrderAdapter(private val orderRepository: OrderRepository) : OrderPort {
             OrderEntityConverter.toOrderModel(it)
         }
     }
+
+    override fun deleteAll() {
+        orderRepository.deleteAll()
+    }
 }
 
 object OrderEntityConverter {

@@ -1,8 +1,7 @@
-package com.example.bookorder.controller
+package com.example.bookorder.controller.order
 
 import com.example.bookorder.RestApiResponse
 import com.example.bookorder.create.CreateOrderRequest
-import com.example.bookorder.create.CreateOrderResponse
 import com.example.bookorder.create.CreateOrderUseCase
 import com.example.bookorder.create.OrderItemRequest
 import jakarta.validation.Valid
@@ -29,10 +28,10 @@ class CreateOrderController(
             HttpStatus.OK
         )
     }
+
 }
 
 class CreateOrder {
-
     data class CreateOrderItemRequest(
         val bookId: Long,
         val quantity: Int

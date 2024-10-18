@@ -17,19 +17,20 @@ redis:
 spring:
   config:
     activate:
-      on-profile: local
+      on-profile: test
+
   datasource:
-    url: jdbc:mysql://localhost:${SA_MYSQL_DB_PORT}/${SA_MYSQL_DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul
-    username: ${SA_MYSQL_DB_USERNAME}
-    password: ${SA_MYSQL_DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=Asia/Seoul
+    username: test
+    password: test
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: ${JPA_HIBERNATE_DDL_AUTO}
+      ddl-auto: create
     #    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         default_batch_fetch_size: 100
   flyway:
-    baseline-on-migrate: ${BASELINE_ON_MIGRATE}
+    baseline-on-migrate: false

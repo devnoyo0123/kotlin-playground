@@ -4,19 +4,21 @@ import com.example.bookorder.book.Book
 import com.example.bookorder.book.BookId
 import com.example.bookorder.book.BookPort
 import com.example.bookorder.book.exception.InsufficientStockException
-import com.example.bookorder.create.exception.OrderCreationException
-import com.example.bookorder.distributed_lock.DistributedLock
 import com.example.bookorder.order.Order
 import com.example.bookorder.order.OrderItem
 import com.example.bookorder.order.OrderPort
 import com.example.bookorder.order.OrderStatus
 import org.slf4j.LoggerFactory
-import org.springframework.dao.OptimisticLockingFailureException
-import org.springframework.retry.annotation.Backoff
+import org.springframework.orm.ObjectOptimisticLockingFailureException
+import org.springframework.retry.RetryCallback
+import org.springframework.retry.RetryContext
+import org.springframework.retry.RetryListener
 import org.springframework.retry.annotation.Retryable
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+
 
 @Service
 class CreateOrderService(
@@ -26,10 +28,11 @@ class CreateOrderService(
 
     private val logger = LoggerFactory.getLogger(CreateOrderService::class.java)
 
+
     @Retryable(
-        value = [OptimisticLockingFailureException::class],
-        maxAttempts = 3,
-        backoff = Backoff(delay = 500)
+        value = [ObjectOptimisticLockingFailureException::class],
+        maxAttempts = 10,
+        listeners = ["CreateOrderUseCaseRetryListener"]
     )
     @Transactional
     override fun execute(request: CreateOrderRequest): CreateOrderResponse {
@@ -46,6 +49,7 @@ class CreateOrderService(
 
         // 3. 실제 주문 생성 및 재고 감소
         return createOrderAndUpdateStock(request.idempotencyKey, bookQuantities)
+
     }
 
     private fun validateAndCreateBookQuantities(items: List<OrderItemRequest>): List<Pair<Book, Int>> {
@@ -63,43 +67,50 @@ class CreateOrderService(
         }
     }
 
-    @DistributedLock(
-        keys = ["#bookQuantities.![first.getEntityId()]"],
-        waitTime = 10,
-        leaseTime = 5
-    )
     fun createOrderAndUpdateStock(idempotencyKey: String, bookQuantities: List<Pair<Book, Int>>): CreateOrderResponse {
-        try {
-            // 재고 감소 및 책 정보 업데이트
-            bookQuantities.map { (book, quantity) ->
-                book.decreaseStock(quantity)
-                bookPort.save(book)
-            }
 
-            // OrderItem 생성
-            val orderItems = bookQuantities.map { (book, quantity) ->
-                OrderItem(
-                    bookId = book.getEntityId(),
-                    quantity = quantity,
-                    price = book.price
-                )
-            }
+        bookQuantities.map { (book, quantity) ->
+            book.decreaseStock(quantity)
+            bookPort.save(book)
+        }
 
-            // 주문 생성
-            val totalAmount = orderItems.sumOf { it.price * BigDecimal(it.quantity) }
-            val order = Order(
-                idempotencyKey = idempotencyKey,
-                totalAmount = totalAmount,
-                status = OrderStatus.PENDING,
-                orderItems = orderItems
+
+        // OrderItem 생성
+        val orderItems = bookQuantities.map { (book, quantity) ->
+            OrderItem(
+                bookId = book.getEntityId(),
+                quantity = quantity,
+                price = book.price
             )
+        }
 
-            val savedOrder = orderPort.save(order)
-            logger.info("Order created successfully: ${savedOrder.getEntityId()}")
-            return CreateOrderResponse(savedOrder.getEntityId(), savedOrder.status)
-        } catch (e: Exception) {
-            logger.error("Error occurred while creating order", e)
-            throw OrderCreationException.forIdempotentKey(idempotencyKey, e)
+        // 주문 생성
+        val totalAmount = orderItems.sumOf { it.price * BigDecimal(it.quantity) }
+        val order = Order(
+            idempotencyKey = idempotencyKey,
+            totalAmount = totalAmount,
+            status = OrderStatus.PENDING,
+            orderItems = orderItems
+        )
+
+        val savedOrder = orderPort.save(order)
+        logger.info("Order created successfully: ${savedOrder.getEntityId()}")
+        return CreateOrderResponse(savedOrder.getEntityId(), savedOrder.status)
+    }
+}
+
+@Component("CreateOrderUseCaseRetryListener")
+class CreateOrderUseCaseRetryListener : RetryListener {
+    override fun <T : Any, E : Throwable> onError(
+        context: RetryContext,
+        callback: RetryCallback<T, E>,
+        throwable: Throwable
+    ) {
+        val maxAttempts = context.getAttribute(RetryContext.MAX_ATTEMPTS) as Int
+        println("retrying ${context.retryCount} of $maxAttempts")
+        if (context.retryCount == maxAttempts) {
+            // 최대 시도 횟수 초과 시 실행할 로직
+            println("최대 재시도 횟수를 초과했습니다.")
         }
     }
 }
