@@ -17,7 +17,9 @@ class FindOrderByIdService(private val orderPort: OrderPort) : FindOrderByIdUseC
         val order = orderPort.findById(orderId) ?: throw OrderNotFoundException.forOrderId(orderId)
         return FindOrderByIdResponse(
             orderId = order.getEntityId().value,
+            totalAmount = order.totalAmount,
             status = order.status,
+            orderItems = order.orderItems
         )
     }
 }
