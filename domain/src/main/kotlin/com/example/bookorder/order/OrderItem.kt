@@ -1,6 +1,5 @@
 package com.example.bookorder.order
 
-import com.example.bookorder.book.Book
 import com.example.bookorder.book.BookId
 import com.example.bookorder.core.entity.BaseEntity
 import com.example.bookorder.core.entity.EntityId

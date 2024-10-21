@@ -30,8 +30,9 @@ class RestApiResponse<T>(
     )
 
     companion object {
-        fun <T> success(data: T, status: HttpStatus): ResponseEntity<RestApiResponse<T>> {
-            val meta = Meta(Status.SUCCESS)
+
+        fun <T> success(data: T, message: String, status: HttpStatus = HttpStatus.OK): ResponseEntity<RestApiResponse<T>> {
+            val meta = Meta(status = Status.SUCCESS, message = message)
             return ResponseEntity(RestApiResponse(meta, data), status)
         }
 

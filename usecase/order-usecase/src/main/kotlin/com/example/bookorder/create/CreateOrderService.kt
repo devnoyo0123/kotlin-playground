@@ -4,17 +4,11 @@ import com.example.bookorder.book.Book
 import com.example.bookorder.book.BookId
 import com.example.bookorder.book.BookPort
 import com.example.bookorder.book.exception.InsufficientStockException
-import com.example.bookorder.order.Order
-import com.example.bookorder.order.OrderItem
-import com.example.bookorder.order.OrderPort
-import com.example.bookorder.order.OrderStatus
+import com.example.bookorder.create.exception.CreateOrderUseCaseExceptionWrapper
+import com.example.bookorder.order.*
 import org.slf4j.LoggerFactory
 import org.springframework.orm.ObjectOptimisticLockingFailureException
-import org.springframework.retry.RetryCallback
-import org.springframework.retry.RetryContext
-import org.springframework.retry.RetryListener
 import org.springframework.retry.annotation.Retryable
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
@@ -25,23 +19,21 @@ class CreateOrderService(
     private val bookPort: BookPort,
     private val orderPort: OrderPort
 ) : CreateOrderUseCase {
-
     private val logger = LoggerFactory.getLogger(CreateOrderService::class.java)
 
-
+    @CreateOrderUseCaseExceptionWrapper
     @Retryable(
         value = [ObjectOptimisticLockingFailureException::class],
-        maxAttempts = 10,
-        listeners = ["CreateOrderUseCaseRetryListener"]
+        maxAttempts = 5,
     )
     @Transactional
     override fun execute(request: CreateOrderRequest): CreateOrderResponse {
-        logger.info("Attempting to create order with idempotencyKey: ${request.idempotencyKey}")
+        logger.debug("Attempting to create order with idempotencyKey: ${request.idempotencyKey}")
 
         // 1. 중복 주문 체크
         orderPort.findByIdempotencyKey(request.idempotencyKey)?.let {
-            logger.info("Duplicate order found for idempotencyKey: ${request.idempotencyKey}")
-            return CreateOrderResponse(it.getEntityId(), it.status)
+            logger.debug("Duplicate order found for idempotencyKey: ${request.idempotencyKey}")
+            return CreateOrderResponse(it.getEntityId(), it.status, OrderSuccessReason.ALREADY_PAID.formatMessage())
         }
 
         // 2. 책 정보 조회 및 재고 확인
@@ -49,7 +41,6 @@ class CreateOrderService(
 
         // 3. 실제 주문 생성 및 재고 감소
         return createOrderAndUpdateStock(request.idempotencyKey, bookQuantities)
-
     }
 
     private fun validateAndCreateBookQuantities(items: List<OrderItemRequest>): List<Pair<Book, Int>> {
@@ -74,7 +65,6 @@ class CreateOrderService(
             bookPort.save(book)
         }
 
-
         // OrderItem 생성
         val orderItems = bookQuantities.map { (book, quantity) ->
             OrderItem(
@@ -94,23 +84,7 @@ class CreateOrderService(
         )
 
         val savedOrder = orderPort.save(order)
-        logger.info("Order created successfully: ${savedOrder.getEntityId()}")
-        return CreateOrderResponse(savedOrder.getEntityId(), savedOrder.status)
-    }
-}
-
-@Component("CreateOrderUseCaseRetryListener")
-class CreateOrderUseCaseRetryListener : RetryListener {
-    override fun <T : Any, E : Throwable> onError(
-        context: RetryContext,
-        callback: RetryCallback<T, E>,
-        throwable: Throwable
-    ) {
-        val maxAttempts = context.getAttribute(RetryContext.MAX_ATTEMPTS) as Int
-        println("retrying ${context.retryCount} of $maxAttempts")
-        if (context.retryCount == maxAttempts) {
-            // 최대 시도 횟수 초과 시 실행할 로직
-            println("최대 재시도 횟수를 초과했습니다.")
-        }
+        logger.debug("Order created successfully: ${savedOrder.getEntityId()}")
+        return CreateOrderResponse(savedOrder.getEntityId(), savedOrder.status, OrderSuccessReason.ORDER_CREATED.formatMessage())
     }
 }

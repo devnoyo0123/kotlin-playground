@@ -5,5 +5,6 @@ import com.example.bookorder.order.OrderStatus
 
 data class CreateOrderResponse(
     val orderId: OrderId,
-    val status: OrderStatus
+    val status: OrderStatus,
+    val message: String = ""
 )

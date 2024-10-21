@@ -7,8 +7,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":domain"))  // domain 모듈에 대한 의존성
-    implementation(project(":usecase:core"))  // domain 모듈에 대한 의존성
+    implementation(project(":domain"))
+    implementation(project(":usecase:core"))
 
     implementation("org.springframework.boot:spring-boot-starter")
 

@@ -14,14 +14,17 @@ dependencies {
     implementation(project(":usecase:core"))
     implementation(project(":usecase:order-usecase"))
 
+    implementation("org.springframework.boot:spring-boot-starter-aop")
 
     implementation("org.springframework.retry:spring-retry")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0")
 
     testImplementation(kotlin("test"))
     // 테스트를 위한 의존성
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa")
     testImplementation("org.testcontainers:testcontainers:${libs.versions.testcontainers.get()}")
 }
 
