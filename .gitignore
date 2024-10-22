@@ -48,7 +48,8 @@ bin/
 .idea/
 
 
-container/local/mysql
+container/local/*
+!container/local/redis
 
 .env
 .env.local
