@@ -1,15 +1,17 @@
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version libs.versions.spring.boot.get()
-    id("io.spring.dependency-management") version libs.versions.spring.dependency.management.get()
-    kotlin("plugin.spring") version libs.versions.kotlin.get()
+    id("org.springframework.boot") version "3.3.3"
+    id("io.spring.dependency-management") version "1.1.3"
+    kotlin("plugin.spring") version "2.0.20"
 }
 
 dependencies {
-    implementation(project(":common:kafka"))  // domain 모듈에 대한 의존성
+
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    implementation("org.springframework.boot:spring-boot-starter")
 
     // 로깅을 위한 의존성
     implementation("io.github.microutils:kotlin-logging:2.1.23")

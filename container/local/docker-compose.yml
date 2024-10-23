@@ -10,6 +10,8 @@ services:
       - 6380:6380
     volumes:
       - ./redis/redis.conf:/etc/redis.conf
+    networks:
+      - book-order-infra
 
 # mysql
   mysql:
@@ -30,4 +32,102 @@ services:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
       - --default-authentication-plugin=mysql_native_password
+    networks:
+      - book-order-infra
 
+  # Kafka
+  kafka-00:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./kafka/secrets:/etc/kafka/secrets
+      - ./kafka/config:/mnt/shared/config
+    environment:
+      CLUSTER_ID: "event-broker"
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-00:29092,2@kafka-01:29093,3@kafka-02:29094"
+      KAFKA_LISTENERS: "PLAINTEXT://:19092,CONTROLLER://:29092,EXTERNAL://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-00:19092,EXTERNAL://localhost:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+    networks:
+      - book-order-infra
+
+  kafka-01:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./kafka/secrets:/etc/kafka/secrets
+      - ./kafka/config:/mnt/shared/config
+    environment:
+      CLUSTER_ID: "event-broker"
+      KAFKA_NODE_ID: 2
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-00:29092,2@kafka-01:29093,3@kafka-02:29094"
+      KAFKA_LISTENERS: "PLAINTEXT://:19093,CONTROLLER://:29093,EXTERNAL://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-01:19093,EXTERNAL://localhost:9093"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+    networks:
+      - book-order-infra
+
+  kafka-02:
+    image: apache/kafka:3.7.0
+    ports:
+      - "9094:9094"
+    volumes:
+      - ./kafka/secrets:/etc/kafka/secrets
+      - ./kafka/config:/mnt/shared/config
+    environment:
+      CLUSTER_ID: "event-broker"
+      KAFKA_NODE_ID: 3
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka-00:29092,2@kafka-01:29093,3@kafka-02:29094"
+      KAFKA_LISTENERS: "PLAINTEXT://:19094,CONTROLLER://:29094,EXTERNAL://:9094"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-02:19094,EXTERNAL://localhost:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT'
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+    networks:
+      - book-order-infra
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    depends_on:
+      - kafka-00
+      - kafka-01
+      - kafka-02
+    ports:
+      - "9090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-00:19092,kafka-01:19093,kafka-02:19094
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - book-order-infra
+
+  # Debezium
+  debezium:
+    image: debezium/connect:2.6
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mysql
+      - kafka-00
+      - kafka-01
+      - kafka-02
+    environment:
+      - BOOTSTRAP_SERVERS=kafka-00:19092,kafka-01:19093,kafka-02:19094
+      - GROUP_ID=debezium-00
+      - CONFIG_STORAGE_TOPIC=DEBEZIUM_CONNECT_CONFIGS
+      - OFFSET_STORAGE_TOPIC=DEBEZIUM_CONNECT_OFFSETS
+      - STATUS_STORAGE_TOPIC=DEBEZIUM_CONNECT_STATUSES
+      - ENABLE_DEBEZIUM_SCRIPTING='true'
+    networks:
+      - book-order-infra
+
+networks:
+  book-order-infra:
+    driver: bridge

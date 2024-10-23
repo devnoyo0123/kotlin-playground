@@ -17,7 +17,6 @@ data class OrderItem(
     override val id: OrderItemId? = null,
     val bookId: BookId,
     val quantity: Int,
-    val price: BigDecimal
-): Audit(), BaseEntity<OrderItemId> {
+    val price: BigDecimal,
 
-}
+): Audit(), BaseEntity<OrderItemId>

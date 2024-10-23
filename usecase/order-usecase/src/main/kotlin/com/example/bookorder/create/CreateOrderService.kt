@@ -83,8 +83,19 @@ class CreateOrderService(
             orderItems = orderItems
         )
 
-        val savedOrder = orderPort.save(order)
-        logger.debug("Order created successfully: ${savedOrder.getEntityId()}")
-        return CreateOrderResponse(savedOrder.getEntityId(), savedOrder.status, OrderSuccessReason.ORDER_CREATED.formatMessage())
+        val createdOrder = orderPort.save(order)
+        orderPort.save(
+            OrderCreatedEvent(
+                orderId = createdOrder.getEntityId(),
+                orderStatus = createdOrder.status,
+                totalAmount = createdOrder.totalAmount
+            )
+        )
+        logger.debug("Order created successfully: ${createdOrder.getEntityId()}")
+        return CreateOrderResponse(
+            createdOrder.getEntityId(),
+            createdOrder.status,
+            OrderSuccessReason.ORDER_CREATED.formatMessage()
+        )
     }
 }

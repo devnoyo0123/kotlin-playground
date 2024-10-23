@@ -3,9 +3,10 @@ package com.example.bookorder
 import com.example.bookorder.book.exception.InsufficientStockException
 import com.example.bookorder.create.exception.DuplicateOrderException
 import com.example.bookorder.create.exception.MaximumRetryException
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.method.MethodValidationException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -13,12 +14,15 @@ import org.springframework.web.context.request.WebRequest
 
 @RestControllerAdvice
 class BookStoreApiExceptionHandler: AbstractGlobalExceptionHandler() {
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
     @ExceptionHandler(MaximumRetryException::class)
     fun handleMaximumRetryException(
         ex: MaximumRetryException,
         request: WebRequest
     ): ResponseEntity<RestApiResponse<Unit>> {
+        logger.error("Maximum retry attempts exceeded: ${ex.message}", ex)
+
         return RestApiResponse.fail(
             errorCode = "MAXIMUM_RETRY_EXCEEDED",
             message = ex.message ?: "Maximum retry attempts exceeded",
@@ -31,6 +35,8 @@ class BookStoreApiExceptionHandler: AbstractGlobalExceptionHandler() {
         ex: InsufficientStockException,
         request: WebRequest
     ): ResponseEntity<RestApiResponse<Unit>> {
+        logger.warn("Insufficient stock error: ${ex.message}")  // warn 레벨 사용 (비즈니스 로직 예외)
+
         return RestApiResponse.fail(
             errorCode = "INSUFFICIENT_STOCK",
             message = ex.message ?: "Insufficient stock",
@@ -43,6 +49,8 @@ class BookStoreApiExceptionHandler: AbstractGlobalExceptionHandler() {
         ex: DuplicateOrderException,
         request: WebRequest
     ): ResponseEntity<RestApiResponse<Unit>> {
+        logger.warn("Duplicate order detected: ${ex.message}")  // warn 레벨 사용 (비즈니스 로직 예외)
+
         return RestApiResponse.fail(
             errorCode = "DUPLICATE_ORDER",
             message = ex.message ?: "Duplicate order detected",
@@ -55,6 +63,13 @@ class BookStoreApiExceptionHandler: AbstractGlobalExceptionHandler() {
         ex: MethodArgumentNotValidException,
         request: WebRequest
     ): ResponseEntity<RestApiResponse<Unit>> {
+
+        logger.warn("""
+            Invalid request detected:
+            URI: ${request.getDescription(false)}
+            Errors: ${ex.bindingResult.fieldErrors.joinToString(", ") { "${it.field}: ${it.defaultMessage}" }}
+        """.trimIndent())
+
         return RestApiResponse.fail(
             errorCode = "INVALID_REQUEST",
             message = "요청값이 올바르지 않습니다.",

@@ -3,6 +3,7 @@ package com.example.bookorder.order
 import com.example.bookorder.core.AuditEntity
 import jakarta.persistence.*
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Entity
 @Table(
@@ -27,7 +28,10 @@ class OrderItemEntity(
     var quantity: Int,
 
     @Column(nullable = false)
-    var price: BigDecimal
+    var price: BigDecimal,
+    createdAt: LocalDateTime = LocalDateTime.now(),
+    updatedAt: LocalDateTime = LocalDateTime.now(),
+    deletedAt: LocalDateTime? = null
 ) : AuditEntity() {
     fun mapOrderEntity(orderEntity: OrderEntity) {
         this.orderEntity = orderEntity

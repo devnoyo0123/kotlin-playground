@@ -5,7 +5,10 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 
 @Component
-class OrderAdapter(private val orderRepository: OrderRepository) : OrderPort {
+class OrderAdapter(
+    private val orderRepository: OrderEntityRepository,
+    private val orderCreatedEntityRepository: OrderCreatedEntityRepository
+) : OrderPort {
     override fun findById(id: OrderId): Order? {
         return orderRepository.findByIdOrNull(id.value)?.let {
             OrderEntityConverter.toOrderModel(it)
@@ -14,8 +17,14 @@ class OrderAdapter(private val orderRepository: OrderRepository) : OrderPort {
 
     override fun save(order: Order): Order {
         val orderEntity = OrderEntityConverter.toOrderEntity(order)
-        val savedEntity = orderRepository.save(orderEntity)
-        return OrderEntityConverter.toOrderModel(savedEntity)
+        orderRepository.save(orderEntity)
+        return OrderEntityConverter.toOrderModel(orderEntity)
+    }
+
+    override fun save(orderCreatedEvent: OrderCreatedEvent): OrderCreatedEvent {
+        val orderCreatedEventEntity = OrderEntityConverter.toOrderCreatedEntity(orderCreatedEvent)
+        orderCreatedEntityRepository.save(orderCreatedEventEntity)
+        return OrderEntityConverter.toOrderCreateEntityModel(orderCreatedEventEntity)
     }
 
     override fun findByIdempotencyKey(idempotencyKey: String): Order? {
@@ -68,11 +77,12 @@ object OrderEntityConverter {
             id = orderItem.getEntityIdOrNull()?.value,
             bookId = orderItem.bookId.value,
             quantity = orderItem.quantity,
-            price = orderItem.price
-        ).apply {
-            createdAt = orderItem.createdAt
-            updatedAt = orderItem.updatedAt
+            price = orderItem.price,
+            createdAt = orderItem.createdAt,
+            updatedAt = orderItem.updatedAt,
             deletedAt = orderItem.deletedAt
+        ).apply {
+
         }
     }
 
@@ -82,11 +92,36 @@ object OrderEntityConverter {
             id = OrderItemId.of(entity.id),
             bookId = BookId.of(entity.bookId),
             quantity = entity.quantity,
-            price = entity.price
+            price = entity.price,
         ).apply {
             createdAt = entity.createdAt
             updatedAt = entity.updatedAt
             deletedAt = entity.deletedAt
+        }
+    }
+
+    fun toOrderCreatedEntity(orderCreatedEvent: OrderCreatedEvent): OrderCreatedEventEntity {
+        return OrderCreatedEventEntity(
+            id = orderCreatedEvent.getEntityIdOrNull()?.value,
+            orderStatus = orderCreatedEvent.orderStatus,
+            totalAmount = orderCreatedEvent.totalAmount,
+            orderId =orderCreatedEvent.orderId.value,
+            createdAt = orderCreatedEvent.createdAt,
+            updatedAt = orderCreatedEvent.updatedAt,
+            deletedAt = orderCreatedEvent.deletedAt
+        )
+    }
+
+    fun toOrderCreateEntityModel(orderCreatedEventEntity: OrderCreatedEventEntity): OrderCreatedEvent {
+        return OrderCreatedEvent(
+            id = OrderCreatedEventId.of(orderCreatedEventEntity.id),
+            orderId = OrderId.of(orderCreatedEventEntity.orderId),
+            orderStatus = orderCreatedEventEntity.orderStatus,
+            totalAmount = orderCreatedEventEntity.totalAmount
+        ).apply {
+            createdAt = orderCreatedEventEntity.createdAt
+            updatedAt = orderCreatedEventEntity.updatedAt
+            deletedAt = orderCreatedEventEntity.deletedAt
         }
     }
 }

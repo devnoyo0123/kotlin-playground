@@ -4,7 +4,7 @@ plugins {
 
 rootProject.name = "book-order"
 include("domain")
-include("core")
+include("common")
 include("usecase")
 include("usecase:payment-usecase")
 include("usecase:order-usecase")
@@ -12,5 +12,8 @@ include("adapter")
 include("usecase:core")
 include("bookstore-api")
 include("adapter:mysql")
-include("core:rest")
+include("common:rest")
 include("adapter:redis")
+include("worker")
+include("common:util")
+include("common:kafka")
