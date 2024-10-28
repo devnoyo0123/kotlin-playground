@@ -10,9 +10,11 @@ plugins {
 dependencies {
     implementation(project(":usecase:core"))
 
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.redisson:redisson-spring-boot-starter:${libs.versions.redisson.get()}")
-
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.getByName<BootJar>("bootJar") {

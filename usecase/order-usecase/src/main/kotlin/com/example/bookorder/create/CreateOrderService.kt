@@ -17,7 +17,7 @@ import java.math.BigDecimal
 @Service
 class CreateOrderService(
     private val bookPort: BookPort,
-    private val orderPort: OrderPort
+    private val orderPort: OrderPort,
 ) : CreateOrderUseCase {
     private val logger = LoggerFactory.getLogger(CreateOrderService::class.java)
 

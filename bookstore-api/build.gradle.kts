@@ -14,9 +14,6 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":usecase:core"))
     implementation(project(":usecase:order-usecase"))
-
-    implementation("org.springframework.boot:spring-boot-starter-aop")
-
     implementation("org.springframework.retry:spring-retry")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")

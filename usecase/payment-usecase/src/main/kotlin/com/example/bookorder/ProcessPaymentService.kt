@@ -1,11 +1,11 @@
 package com.example.bookorder
 
+import com.example.bookorder.distriubted_lock.DistributedLockWithTransactional
 import com.example.bookorder.order.OrderEvent
 import com.example.bookorder.payment.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 /**
  * 주문 이벤트를 받아 결제를 처리하는 서비스
@@ -28,7 +28,7 @@ class ProcessPaymentService(
 ) : ProcessPaymentUseCase {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @Transactional
+    @DistributedLockWithTransactional(keys = ["#orderEvent.orderId"])
     override fun processPayment(orderEvent: OrderEvent): Payment {
         logger.debug("Processing payment for order: ${orderEvent.orderId}")
 

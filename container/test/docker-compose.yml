@@ -7,7 +7,7 @@ services:
     command: redis-server /etc/redis.conf
     restart: always
     ports:
-      - 6380:6380
+      - 6381:6380
     volumes:
       - ./redis/redis.conf:/etc/redis.conf
 
@@ -23,7 +23,7 @@ services:
       MYSQL_DATABASE: 'test'
       TZ: 'Asia/Seoul'
     ports:
-      - '3306:3306'
+      - '3307:3306'
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci

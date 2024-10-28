@@ -42,7 +42,7 @@ class PaymentApiClient(@Qualifier("paymentHttpClient") private val paymentApiCli
         return when (paymentId.value.toInt() % 3) {
             0 -> PaymentRequest(paymentKey = paymentId.value.toString()) // 정상 케이스
             1 -> PaymentRequest(paymentKey = paymentId.value.toString(), fail = true) // 실패 케이스
-            2 -> PaymentRequest(paymentKey = paymentId.value.toString(), ex = true, delay = 30) // 예외 케이스
+            2 -> PaymentRequest(paymentKey = paymentId.value.toString(), ex = true, delay = 20) // 예외 케이스
             else -> throw IllegalStateException("Unexpected remainder") // 사실상 발생할 수 없는 케이스
         }
     }
@@ -66,7 +66,7 @@ class PaymentApiClient(@Qualifier("paymentHttpClient") private val paymentApiCli
         logger.debug("PaymentApiClient.Cancelling payment for paymentId: $paymentId")
 
         return paymentApiClient.post()
-            .uri("payments/confirm")
+            .uri("payments/cancellation")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(PaymentRequest(paymentKey = paymentId.value.toString()))
             .retrieve()

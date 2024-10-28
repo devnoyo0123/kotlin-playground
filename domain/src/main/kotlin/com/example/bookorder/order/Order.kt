@@ -3,6 +3,7 @@ package com.example.bookorder.order
 import com.example.bookorder.core.entity.BaseEntity
 import com.example.bookorder.core.entity.EntityId
 import com.example.bookorder.core.entity.Audit
+import com.example.bookorder.core.exception.AlreadyProcessedException
 import java.math.BigDecimal
 
 @JvmInline
@@ -24,12 +25,15 @@ data class Order(
 
     fun complete() {
         if (status == OrderStatus.PAID) {
-            throw IllegalStateException("Order already paid")
+            throw AlreadyProcessedException.forId(getEntityIdOrThrow(), Order::class.simpleName.toString())
         }
         status = OrderStatus.PAID
     }
 
     fun fail() {
+        if (status == OrderStatus.FAILED) {
+            throw AlreadyProcessedException.forId(getEntityIdOrThrow(), Order::class.simpleName.toString())
+        }
         status = OrderStatus.FAILED
     }
 
