@@ -110,7 +110,7 @@ services:
 
   # Debezium
   debezium:
-    image: debezium/connect:2.6
+    image: debezium/connect:3.0.0.Final
     ports:
       - "8083:8083"
     depends_on:

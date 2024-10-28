@@ -1,7 +1,6 @@
 package com.example.bookorder.create.exception
 
 import com.example.bookorder.book.exception.InsufficientStockException
-import com.example.bookorder.order.OrderFailureReason
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -20,9 +19,9 @@ class CreateOrderUseCaseExceptionWrapperAspect {
             joinPoint.proceed()
         } catch (e: Exception) {
             when (e) {
-                is ObjectOptimisticLockingFailureException -> throw MaximumRetryException(OrderFailureReason.MAXIMUM_RETRY_EXCEEDED.formatMessage(),e)
-                is InsufficientStockException -> throw InsufficientStockException(OrderFailureReason.INSUFFICIENT_STOCK.formatMessage(), e)
-                is DataIntegrityViolationException -> throw DuplicateOrderException(OrderFailureReason.DUPLICATE_ORDER.formatMessage(), e)
+                is ObjectOptimisticLockingFailureException -> throw OrderMaximumRetryException(OrderMaximumRetryException.MESSAGE ,e)
+                is InsufficientStockException -> throw InsufficientStockException(InsufficientStockException.MESSAGE, e)
+                is DataIntegrityViolationException -> throw DuplicateOrderException(DuplicateOrderException.MESSAGE, e)
                 else -> throw e}
         }
     }

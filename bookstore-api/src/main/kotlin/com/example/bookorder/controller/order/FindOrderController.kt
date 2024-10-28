@@ -44,7 +44,7 @@ fun FindOrderByIdResponse.toPayload(): FindOrderById.Response {
         status = this.status,
         orderItems = this.orderItems.map {
             OrderItemDto(
-                id = it.getEntityId().value,
+                id = it.getEntityIdOrThrow().value,
                 bookId = it.bookId.value,
                 quantity = it.quantity,
                 price = it.price,

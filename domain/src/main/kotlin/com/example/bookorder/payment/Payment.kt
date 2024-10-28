@@ -1,15 +1,14 @@
 package com.example.bookorder.payment
 
+import com.example.bookorder.core.entity.Audit
 import com.example.bookorder.core.entity.BaseEntity
 import com.example.bookorder.core.entity.EntityId
-import com.example.bookorder.core.entity.Audit
-import java.math.BigDecimal
+import com.example.bookorder.order.OrderId
 
 enum class PaymentStatus {
     PENDING,     // 결제 대기 중
     COMPLETED,   // 결제 완료
     FAILED,      // 결제 실패
-    UNCERTAIN    // 결제 상태 불확실 (타임아웃 등으로 인해 상태 확인 필요)
 }
 
 @JvmInline
@@ -20,28 +19,19 @@ value class PaymentId(override val value: Long) : EntityId<Long> {
     }
 }
 
-
 data class Payment(
     override val id: PaymentId? = null,
-    val orderId: Long,
-    val amount: BigDecimal,
-    var status: PaymentStatus,
-    val paymentMethod: String,
-    var externalTransactionId: String? = null
+    val orderId: OrderId,
+    var status: PaymentStatus = PaymentStatus.PENDING,
 ) : Audit(), BaseEntity<PaymentId> {
-    fun markCompleted(externalTransactionId: String) {
+    fun markCompleted() {
         if (status == PaymentStatus.COMPLETED) {
             throw IllegalStateException("Payment already completed")
         }
-        this.externalTransactionId = externalTransactionId
         status = PaymentStatus.COMPLETED
     }
 
     fun markFailed() {
         status = PaymentStatus.FAILED
-    }
-
-    fun markUncertain() {
-        status = PaymentStatus.UNCERTAIN
     }
 }

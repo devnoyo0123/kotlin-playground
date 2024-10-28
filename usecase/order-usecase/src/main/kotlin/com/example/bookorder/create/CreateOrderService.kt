@@ -33,7 +33,7 @@ class CreateOrderService(
         // 1. 중복 주문 체크
         orderPort.findByIdempotencyKey(request.idempotencyKey)?.let {
             logger.debug("Duplicate order found for idempotencyKey: ${request.idempotencyKey}")
-            return CreateOrderResponse(it.getEntityId(), it.status, OrderSuccessReason.ALREADY_PAID.formatMessage())
+            return CreateOrderResponse(it.getEntityIdOrThrow(), it.status, OrderSuccessReason.ALREADY_PAID.formatMessage())
         }
 
         // 2. 책 정보 조회 및 재고 확인
@@ -46,7 +46,7 @@ class CreateOrderService(
     private fun validateAndCreateBookQuantities(items: List<OrderItemRequest>): List<Pair<Book, Int>> {
         val bookIds = items.map { BookId.of(it.bookId) }
         val books = bookPort.findByIds(bookIds)
-        val bookMap = books.associateBy { it.getEntityId() }
+        val bookMap = books.associateBy { it.getEntityIdOrThrow() }
 
         return items.map { item ->
             val bookId = BookId.of(item.bookId)
@@ -68,7 +68,7 @@ class CreateOrderService(
         // OrderItem 생성
         val orderItems = bookQuantities.map { (book, quantity) ->
             OrderItem(
-                bookId = book.getEntityId(),
+                bookId = book.getEntityIdOrThrow(),
                 quantity = quantity,
                 price = book.price
             )
@@ -85,15 +85,15 @@ class CreateOrderService(
 
         val createdOrder = orderPort.save(order)
         orderPort.save(
-            OrderCreatedEvent(
-                orderId = createdOrder.getEntityId(),
+            OrderEvent(
+                orderId = createdOrder.getEntityIdOrThrow(),
                 orderStatus = createdOrder.status,
                 totalAmount = createdOrder.totalAmount
             )
         )
-        logger.debug("Order created successfully: ${createdOrder.getEntityId()}")
+        logger.debug("Order created successfully: ${createdOrder.getEntityIdOrThrow()}")
         return CreateOrderResponse(
-            createdOrder.getEntityId(),
+            createdOrder.getEntityIdOrThrow(),
             createdOrder.status,
             OrderSuccessReason.ORDER_CREATED.formatMessage()
         )

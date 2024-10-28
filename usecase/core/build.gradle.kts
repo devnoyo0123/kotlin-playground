@@ -10,7 +10,6 @@ dependencies {
     implementation(project(":domain"))
 
     implementation("org.springframework.boot:spring-boot-starter")
-    implementation("org.redisson:redisson-spring-boot-starter:${libs.versions.redisson.get()}")
     implementation("org.springframework.boot:spring-boot-starter-aop")
 }
 

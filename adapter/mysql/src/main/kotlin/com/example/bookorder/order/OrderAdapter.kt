@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class OrderAdapter(
     private val orderRepository: OrderEntityRepository,
-    private val orderCreatedEntityRepository: OrderCreatedEntityRepository
+    private val orderEventRepository: OrderEventEntityRepository
 ) : OrderPort {
     override fun findById(id: OrderId): Order? {
         return orderRepository.findByIdOrNull(id.value)?.let {
@@ -21,10 +21,10 @@ class OrderAdapter(
         return OrderEntityConverter.toOrderModel(orderEntity)
     }
 
-    override fun save(orderCreatedEvent: OrderCreatedEvent): OrderCreatedEvent {
-        val orderCreatedEventEntity = OrderEntityConverter.toOrderCreatedEntity(orderCreatedEvent)
-        orderCreatedEntityRepository.save(orderCreatedEventEntity)
-        return OrderEntityConverter.toOrderCreateEntityModel(orderCreatedEventEntity)
+    override fun save(orderEvent: OrderEvent): OrderEvent {
+        val orderEventEntity = OrderEntityConverter.toOrderEventEntity(orderEvent)
+        orderEventRepository.save(orderEventEntity)
+        return OrderEntityConverter.toOrderEventModel(orderEventEntity)
     }
 
     override fun findByIdempotencyKey(idempotencyKey: String): Order? {
@@ -36,6 +36,7 @@ class OrderAdapter(
     override fun deleteAll() {
         orderRepository.deleteAll()
     }
+
 }
 
 object OrderEntityConverter {
@@ -44,12 +45,11 @@ object OrderEntityConverter {
             id = order.id?.value,
             idempotencyKey = order.idempotencyKey,
             totalAmount = order.totalAmount,
-            status = order.status
-        ).apply {
-            createdAt = order.createdAt
-            updatedAt = order.updatedAt
+            status = order.status,
+            createdAt = order.createdAt,
+            updatedAt = order.updatedAt,
             deletedAt = order.deletedAt
-        }
+        )
 
         order.orderItems.forEach { orderItem ->
             orderEntity.addOrderItem(toOrderItemEntity(orderItem))
@@ -81,9 +81,7 @@ object OrderEntityConverter {
             createdAt = orderItem.createdAt,
             updatedAt = orderItem.updatedAt,
             deletedAt = orderItem.deletedAt
-        ).apply {
-
-        }
+        )
     }
 
 
@@ -100,28 +98,28 @@ object OrderEntityConverter {
         }
     }
 
-    fun toOrderCreatedEntity(orderCreatedEvent: OrderCreatedEvent): OrderCreatedEventEntity {
-        return OrderCreatedEventEntity(
-            id = orderCreatedEvent.getEntityIdOrNull()?.value,
-            orderStatus = orderCreatedEvent.orderStatus,
-            totalAmount = orderCreatedEvent.totalAmount,
-            orderId =orderCreatedEvent.orderId.value,
-            createdAt = orderCreatedEvent.createdAt,
-            updatedAt = orderCreatedEvent.updatedAt,
-            deletedAt = orderCreatedEvent.deletedAt
+    fun toOrderEventEntity(orderEvent: OrderEvent): OrderEventEntity {
+        return OrderEventEntity(
+            id = orderEvent.getEntityIdOrNull()?.value,
+            orderStatus = orderEvent.orderStatus,
+            totalAmount = orderEvent.totalAmount,
+            orderId =orderEvent.orderId.value,
+            createdAt = orderEvent.createdAt,
+            updatedAt = orderEvent.updatedAt,
+            deletedAt = orderEvent.deletedAt
         )
     }
 
-    fun toOrderCreateEntityModel(orderCreatedEventEntity: OrderCreatedEventEntity): OrderCreatedEvent {
-        return OrderCreatedEvent(
-            id = OrderCreatedEventId.of(orderCreatedEventEntity.id),
-            orderId = OrderId.of(orderCreatedEventEntity.orderId),
-            orderStatus = orderCreatedEventEntity.orderStatus,
-            totalAmount = orderCreatedEventEntity.totalAmount
+    fun toOrderEventModel(orderEventEntity: OrderEventEntity): OrderEvent {
+        return OrderEvent(
+            id = OrderEventId.of(orderEventEntity.id),
+            orderId = OrderId.of(orderEventEntity.orderId),
+            orderStatus = orderEventEntity.orderStatus,
+            totalAmount = orderEventEntity.totalAmount
         ).apply {
-            createdAt = orderCreatedEventEntity.createdAt
-            updatedAt = orderCreatedEventEntity.updatedAt
-            deletedAt = orderCreatedEventEntity.deletedAt
+            createdAt = orderEventEntity.createdAt
+            updatedAt = orderEventEntity.updatedAt
+            deletedAt = orderEventEntity.deletedAt
         }
     }
 }

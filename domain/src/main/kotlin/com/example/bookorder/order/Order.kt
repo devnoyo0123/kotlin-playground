@@ -22,22 +22,27 @@ data class Order(
     val orderItems: List<OrderItem>
 ): Audit(), BaseEntity<OrderId> {
 
-    fun completeOrder() {
+    fun complete() {
         if (status == OrderStatus.PAID) {
             throw IllegalStateException("Order already paid")
         }
         status = OrderStatus.PAID
     }
 
-    fun failOrder() {
+    fun fail() {
         status = OrderStatus.FAILED
     }
 
-    fun markUncertain() {
-        status = OrderStatus.PAYMENT_UNCERTAIN
+    fun isCompleted(): Boolean {
+        return status == OrderStatus.PAID
     }
+
+    fun isFailed(): Boolean {
+        return status == OrderStatus.FAILED
+    }
+
 }
 
 enum class OrderStatus {
-    PENDING, PAID, FAILED, PAYMENT_UNCERTAIN
+    PENDING, PAID, FAILED
 }

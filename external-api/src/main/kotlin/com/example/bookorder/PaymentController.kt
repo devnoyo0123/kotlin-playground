@@ -1,6 +1,8 @@
 package com.example.bookorder
 
 import jakarta.annotation.PreDestroy
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.concurrent.*
@@ -22,15 +24,17 @@ class PaymentController {
     private val paymentStatus = ConcurrentHashMap<String, String>()
     private val executorService = Executors.newSingleThreadScheduledExecutor()
 
-    @PostMapping
+    private val logger: Logger = LoggerFactory.getLogger(this::class.java)
+
+    @PostMapping("/confirm")
     fun processPayment(@RequestBody request: PaymentRequest): CompletableFuture<ResponseEntity<PaymentResponse>> {
+        logger.info("Processing payment request: $request")
         // 초기 상태 저장
         paymentStatus[request.paymentKey] = "PENDING"
 
         val future = CompletableFuture<ResponseEntity<PaymentResponse>>()
 
         if (request.ex) {
-            // 60초 후에 상태를 업데이트하고 응답을 반환
             executorService.schedule({
                 paymentStatus[request.paymentKey] = "COMPLETED"
                 future.complete(
@@ -64,6 +68,18 @@ class PaymentController {
     fun getPaymentStatus(@PathVariable paymentKey: String): ResponseEntity<PaymentResponse> {
         val status = paymentStatus[paymentKey] ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(PaymentResponse(status = status))
+    }
+
+    @PostMapping("/cancellation")
+    fun cancelPayment(@RequestBody request: PaymentRequest): ResponseEntity<PaymentResponse> {
+        logger.info("Cancelling payment request: $request")
+        // 초기 상태 저장
+
+        paymentStatus[request.paymentKey] = "CANCELLED"
+
+        return ResponseEntity.ok(
+            PaymentResponse(status = "CANCELLED")
+        )
     }
 
     // 리소스 정리를 위한 소멸자

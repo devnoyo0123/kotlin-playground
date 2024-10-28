@@ -7,6 +7,8 @@ import com.example.bookorder.core.exception.DefaultException
 class InsufficientStockException: DefaultException {
 
     companion object {
+        const val MESSAGE = "재고가 부족합니다."
+
         private const val MESSAGE_FORMAT = "주문을 찾을 수 없습니다. 주문 ID: %s"
 
         fun forBookId(bookId: BookId): InsufficientStockException {

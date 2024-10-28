@@ -21,10 +21,9 @@ data class Book(
     var stock: Int,
     val version: Long = 0  // 버전 필드 추가
 ): Audit(), BaseEntity<BookId> {
-
     fun decreaseStock(quantity: Int) {
         if (stock < quantity) {
-            throw InsufficientStockException.forBookId(getEntityId())
+            throw InsufficientStockException.forBookId(getEntityIdOrThrow())
         }
         stock -= quantity
     }
@@ -33,4 +32,7 @@ data class Book(
         return stock >= quantity
     }
 
+    fun increaseStock(quantity: Int) {
+        stock += quantity
+    }
 }

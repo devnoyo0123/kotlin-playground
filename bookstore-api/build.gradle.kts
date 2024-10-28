@@ -8,8 +8,9 @@ plugins {
 dependencies {
 
     implementation(project(":adapter:mysql"))
-    implementation(project(":adapter:redis"))
     implementation(project(":common:rest"))
+    implementation(project(":common:config"))
+
     implementation(project(":domain"))
     implementation(project(":usecase:core"))
     implementation(project(":usecase:order-usecase"))

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS book_tbl (
-                                        id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                        price      DECIMAL(38, 2) NOT NULL,
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    price      DECIMAL(38, 2) NOT NULL,
     stock      INT            NOT NULL,
     created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     updated_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
@@ -11,21 +11,21 @@ CREATE TABLE IF NOT EXISTS book_tbl (
     );
 
 CREATE TABLE IF NOT EXISTS order_tbl (
-                                         id              BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                         total_amount    DECIMAL(38, 2) NOT NULL,
+    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    total_amount    DECIMAL(38, 2) NOT NULL,
     created_at      DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
     updated_at      DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
     deleted_at      DATETIME(6) DEFAULT NULL,
     idempotency_key VARCHAR(255) NOT NULL,
-    status          ENUM ('FAILED', 'PAID', 'PAYMENT_UNCERTAIN', 'PENDING') NOT NULL,
+    status          VARCHAR(255) NOT NULL,
     CONSTRAINT UKqkjuoxvcuko0cbvow1cd857fg UNIQUE (idempotency_key)
     );
 
 CREATE INDEX idx_order_idempotency_key ON order_tbl (idempotency_key);
 
 CREATE TABLE IF NOT EXISTS orderitem_tbl (
-                                             id         BIGINT AUTO_INCREMENT PRIMARY KEY,
-                                             price      DECIMAL(38, 2) NOT NULL,
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    price      DECIMAL(38, 2) NOT NULL,
     quantity   INT            NOT NULL,
     book_id    BIGINT         NOT NULL,
     created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),

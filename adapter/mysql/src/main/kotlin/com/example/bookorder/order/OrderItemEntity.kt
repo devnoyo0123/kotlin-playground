@@ -32,7 +32,7 @@ class OrderItemEntity(
     createdAt: LocalDateTime = LocalDateTime.now(),
     updatedAt: LocalDateTime = LocalDateTime.now(),
     deletedAt: LocalDateTime? = null
-) : AuditEntity() {
+) : AuditEntity(createdAt, updatedAt, deletedAt) {
     fun mapOrderEntity(orderEntity: OrderEntity) {
         this.orderEntity = orderEntity
     }

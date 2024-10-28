@@ -3,6 +3,7 @@ package com.example.bookorder.order
 import com.example.bookorder.core.AuditEntity
 import jakarta.persistence.*
 import java.math.BigDecimal
+import java.time.LocalDateTime
 
 @Entity
 @Table(
@@ -26,8 +27,11 @@ class OrderEntity(
     var status: OrderStatus,
 
     @OneToMany(mappedBy = "orderEntity", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var orderItems: MutableList<OrderItemEntity> = mutableListOf()
-) : AuditEntity() {
+    var orderItems: MutableList<OrderItemEntity> = mutableListOf(),
+    createdAt: LocalDateTime = LocalDateTime.now(),
+    updatedAt: LocalDateTime = LocalDateTime.now(),
+    deletedAt: LocalDateTime? = null
+) : AuditEntity(createdAt, updatedAt, deletedAt) {
 
     fun addOrderItem(orderItem: OrderItemEntity) {
         orderItems.add(orderItem)

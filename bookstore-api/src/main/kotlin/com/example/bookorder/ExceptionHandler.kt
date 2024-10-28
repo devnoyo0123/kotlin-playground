@@ -2,7 +2,7 @@ package com.example.bookorder
 
 import com.example.bookorder.book.exception.InsufficientStockException
 import com.example.bookorder.create.exception.DuplicateOrderException
-import com.example.bookorder.create.exception.MaximumRetryException
+import com.example.bookorder.create.exception.OrderMaximumRetryException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -16,9 +16,9 @@ import org.springframework.web.context.request.WebRequest
 class BookStoreApiExceptionHandler: AbstractGlobalExceptionHandler() {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @ExceptionHandler(MaximumRetryException::class)
+    @ExceptionHandler(OrderMaximumRetryException::class)
     fun handleMaximumRetryException(
-        ex: MaximumRetryException,
+        ex: OrderMaximumRetryException,
         request: WebRequest
     ): ResponseEntity<RestApiResponse<Unit>> {
         logger.error("Maximum retry attempts exceeded: ${ex.message}", ex)

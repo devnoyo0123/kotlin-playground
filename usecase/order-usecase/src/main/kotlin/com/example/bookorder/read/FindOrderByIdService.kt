@@ -16,7 +16,7 @@ class FindOrderByIdService(private val orderPort: OrderPort) : FindOrderByIdUseC
     override fun execute(orderId: OrderId): FindOrderByIdResponse {
         val order = orderPort.findById(orderId) ?: throw OrderNotFoundException.forOrderId(orderId)
         return FindOrderByIdResponse(
-            orderId = order.getEntityId().value,
+            orderId = order.getEntityIdOrThrow().value,
             totalAmount = order.totalAmount,
             status = order.status,
             orderItems = order.orderItems
