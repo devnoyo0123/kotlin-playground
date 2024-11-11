@@ -44,7 +44,7 @@ class KafkaConfig(
         return ConcurrentKafkaListenerContainerFactory<String, String>().apply {
             consumerFactory = consumerFactory()
             setConcurrency(1) // 단, 이는 토픽의 파티션 수에 따라 제한됩니다. 파티션 수보다 많은 concurrency는 의미가 없습니다.
-            containerProperties.pollTimeout = 3000
+            containerProperties.ackMode = ContainerProperties.AckMode.MANUAL // 수동 커밋
             setCommonErrorHandler(errorHandler) // 등록된 errorHandler 빈을 사용
 
         }

@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
+import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
@@ -21,10 +22,11 @@ class OrderProcessingWorker(
         groupId = "order-worker-0",
         containerFactory = "kafkaListenerContainerFactory")
 
-    fun consume(message: ConsumerRecord<String, String>) {
+    fun consume(message: ConsumerRecord<String, String>, ack: Acknowledgment) {
         val paymentEvent = objectMapper.readValue(message.value(), PaymentEvent::class.java)
         logger.info("Payment event consumed: $paymentEvent")
 
         processOrderUseCase.processOrder(paymentEvent)
+        ack.acknowledge()
     }
 }
