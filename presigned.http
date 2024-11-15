@@ -1,0 +1,10 @@
+### Presigned URL 생성 요청
+POST http://localhost:8080/api/files/presigned-url
+Content-Type: application/json
+
+{
+  "fileKey": "test-image.png",
+  "contentType": "image/png",
+  "duration": 30,
+  "timeUnit": "MINUTES"
+}

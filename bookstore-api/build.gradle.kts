@@ -7,6 +7,7 @@ plugins {
 
 dependencies {
 
+    implementation(project(":adapter:aws-s3"))
     implementation(project(":adapter:mysql"))
     implementation(project(":common:rest"))
     implementation(project(":common:config"))
